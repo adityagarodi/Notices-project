@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campcast</title>
+  <meta name="description" content="Digital noticeboard for college announcements and notices">
+  <meta name="author" content="College Administration">
+
+  <!-- Preload critical resources -->
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" as="style">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- TailwindCSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- App styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="sticky-header" role="banner">
+    <div class="flex items-center">
+      <img
+        src="images.jpeg"
+        alt="Campcast logo"
+        class="w-10 h-10 mr-3 object-cover rounded-full"
+        loading="lazy"
+      >
+      <h1 class="text-white font-semibold">Campcast</h1>
+    </div>
+    <nav role="navigation" aria-label="Main navigation" class="flex items-center gap-3">
+      <div id="account-info" class="account-pill hidden" aria-live="polite"></div>
+      <button
+        id="logout-btn"
+        class="btn-danger px-4 py-2 rounded-lg hidden"
+        aria-label="Logout from admin panel"
+        title="Logout"
+      >
+        <i class="bi bi-box-arrow-right mr-2"></i>Logout
+      </button>
+    </nav>
+  </header>
+
+  <main class="container py-10 md:py-12" role="main">
+    <div class="role-selector" id="role-selector" role="tablist" aria-label="Select view mode">
+      <button
+        id="student-btn"
+        class="active"
+        role="tab"
+        aria-selected="true"
+        aria-controls="student-view"
+        tabindex="0"
+      >
+        <i class="bi bi-people-fill mr-2"></i>Student View
+      </button>
+      <button
+        id="admin-btn"
+        role="tab"
+        aria-selected="false"
+        aria-controls="admin-login admin-dashboard"
+        tabindex="-1"
+      >
+        <i class="bi bi-gear-fill mr-2"></i>Admin Panel
+      </button>
+    </div>
+
+    <!-- Register Modal -->
+    <div id="register-modal" class="notice-modal" role="dialog" aria-labelledby="register-title" aria-hidden="true">
+      <div class="notice-modal-content">
+        <button id="close-register-modal" class="close-button" aria-label="Close register modal">&times;</button>
+        <h2 id="register-title" class="text-3xl mb-6 font-bold">Create Account</h2>
+        <form id="register-form" class="space-y-5" novalidate>
+          <div class="mb-4">
+            <label for="reg-username" class="block text-gray-700 text-sm font-medium mb-2">Username *</label>
+            <input type="text" id="reg-username" name="username" class="w-full p-2 border rounded" required maxlength="50" aria-describedby="reg-username-error" />
+            <div id="reg-username-error" class="text-red-500 text-sm mt-1 hidden" role="alert"></div>
+          </div>
+          <div class="mb-6">
+            <label for="reg-password" class="block text-gray-700 text-sm font-medium mb-2">Password *</label>
+            <input type="password" id="reg-password" name="password" class="w-full p-2 border rounded" required maxlength="100" aria-describedby="reg-password-error" />
+            <div id="reg-password-error" class="text-red-500 text-sm mt-1 hidden" role="alert"></div>
+          </div>
+          <button type="submit" class="w-full btn-primary" id="register-submit">
+            <span class="save-text">Create Account</span>
+            <span class="spinner hidden"></span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Admin Login Section -->
+    <section id="admin-login" class="admin-login" role="tabpanel" aria-labelledby="admin-btn" aria-hidden="true">
+      <div class="bg-white p-8 rounded-lg shadow-lg max-w-md mx-auto border border-gray-200 fade-in">
+        <h2 class="text-3xl mb-6 text-center font-bold">Admin Login</h2>
+        <form id="login-form" novalidate>
+          <div class="mb-4">
+            <label for="username" class="block text-gray-700 text-sm font-medium mb-2">Username</label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              class="w-full p-2 border rounded"
+              required
+              autocomplete="username"
+              aria-describedby="username-error"
+              maxlength="50"
+            >
+            <div id="username-error" class="text-red-500 text-sm mt-1 hidden" role="alert"></div>
+          </div>
+          <div class="mb-6">
+            <label for="password" class="block text-gray-700 text-sm font-medium mb-2">Password</label>
+            <div class="relative">
+              <input
+                type="password"
+                id="password"
+                name="password"
+                class="w-full p-2 border rounded pr-10"
+                required
+                autocomplete="current-password"
+                aria-describedby="password-error"
+                maxlength="100"
+              >
+              <button type="button" id="toggle-password" aria-label="Show password" class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500">
+                <i class="bi bi-eye" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div id="password-error" class="text-red-500 text-sm mt-1 hidden" role="alert"></div>
+          </div>
+          <div class="mb-4 flex items-center">
+            <input type="checkbox" id="remember-me" class="mr-2">
+            <label for="remember-me" class="text-sm text-gray-700">Remember me on this device</label>
+          </div>
+          <button type="submit" class="w-full btn-primary" id="login-submit">
+            <span class="login-text">Login</span>
+            <span class="spinner hidden"></span>
+          </button>
+        </form>
+        <p class="mt-6 text-sm text-gray-600 text-center">Use your account or create a new one</p>
+        <button id="register-btn" class="w-full btn-primary mt-3 py-2">
+          <i class="bi bi-person-plus mr-2"></i>Create Account
+        </button>
+      </div>
+    </section>
+
+    <!-- Admin Dashboard -->
+    <section id="admin-dashboard" class="admin-dashboard" role="tabpanel" aria-labelledby="admin-btn" aria-hidden="true">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-3xl font-bold">Admin Dashboard</h2>
+        <button id="new-notice-btn" class="btn-primary" aria-label="Create new notice">
+          <i class="bi bi-plus-circle mr-2"></i>New Notice
+        </button>
+      </div>
+
+      
+
+      
+
+      <div class="bg-white p-6 rounded-lg shadow-lg border border-gray-200 fade-in">
+        <h3 class="text-2xl font-semibold mb-4">Existing Notices</h3>
+        <div id="notices-loading" class="text-center py-8 hidden">
+          <div class="spinner mx-auto"></div>
+          <p class="mt-2 text-gray-600">Loading notices...</p>
+        </div>
+        <ul id="notices-list" class="space-y-4" role="list" aria-label="List of notices"></ul>
+        <div id="no-notices" class="text-center py-8 text-gray-500 hidden">
+          <i class="bi bi-inbox text-4xl mb-2"></i>
+          <p>No notices found. Create your first notice!</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- New/Edit Notice Form Modal -->
+    <div id="notice-modal" class="notice-modal" role="dialog" aria-labelledby="modal-title" aria-hidden="true">
+      <div class="notice-modal-content">
+        <button id="close-modal" class="close-button" aria-label="Close modal">&times;</button>
+        <h2 id="modal-title" class="text-3xl mb-6 font-bold">New Notice</h2>
+        <form id="notice-form" class="space-y-5" novalidate>
+          <div class="mb-4">
+            <label for="notice-title" class="block text-gray-700 text-sm font-medium mb-2">Title *</label>
+            <input
+              type="text"
+              id="notice-title"
+              name="title"
+              class="w-full p-2 border rounded"
+              required
+              maxlength="100"
+              aria-describedby="title-error"
+            >
+            <div id="title-error" class="text-red-500 text-sm mt-1 hidden" role="alert"></div>
+          </div>
+          <div class="mb-4">
+            <label for="notice-description" class="block text-gray-700 text-sm font-medium mb-2">Description *</label>
+            <textarea
+              id="notice-description"
+              name="description"
+              class="w-full p-2 border rounded"
+              rows="4"
+              required
+              maxlength="1000"
+              aria-describedby="description-error"
+            ></textarea>
+            <div id="description-error" class="text-red-500 text-sm mt-1 hidden" role="alert"></div>
+            <div class="text-sm text-gray-500 mt-1">
+              <span id="description-count">0</span>/1000 characters
+            </div>
+          </div>
+          <div class="mb-6">
+            <label for="notice-file" class="block text-gray-700 text-sm font-medium mb-2">Attachment (Image)</label>
+            <div id="image-dropzone" class="file-dropzone" tabindex="0" aria-label="Image drop area">
+              <i class="bi bi-image mr-2"></i> Drag & drop image here, or click to choose
+              <input type="file" id="notice-file" name="image" accept=".png,.jpg,.jpeg,.gif" aria-describedby="file-help" />
+            </div>
+            <div class="mt-3">
+              <button type="button" id="open-media-library" class="btn-secondary">
+                <i class="bi bi-images mr-1"></i> Choose from Media Library
+              </button>
+            </div>
+            <div id="image-info-wrap" class="image-info-wrap hidden" aria-live="polite">
+              <div class="file-pill">
+                <i class="bi bi-file-image mr-2"></i>
+                <span id="selected-image-name">notice.png</span>
+              </div>
+              <button type="button" id="clear-image" class="btn-secondary mt-2">Remove Image</button>
+            </div>
+            <div id="file-help" class="text-sm text-gray-500 mt-1">
+              Upload an optional image to display with the notice.
+            </div>
+          </div>
+          <button type="submit" class="w-full btn-primary" id="save-notice-btn">
+            <span class="save-text">Save Notice</span>
+            <span class="spinner hidden"></span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Media Library Modal -->
+    <div id="media-modal" class="notice-modal" role="dialog" aria-labelledby="media-title" aria-hidden="true">
+      <div class="notice-modal-content" style="max-width: 800px;">
+        <button id="close-media-modal" class="close-button" aria-label="Close media modal">&times;</button>
+        <h2 id="media-title" class="text-2xl mb-4 font-bold">Media Library</h2>
+        <div id="media-loading" class="text-center py-6 hidden">
+          <div class="spinner mx-auto"></div>
+          <p class="mt-2 text-gray-600">Loading media...</p>
+        </div>
+        <div id="media-empty" class="text-center py-8 text-gray-500 hidden">
+          <i class="bi bi-image text-4xl mb-2"></i>
+          <p>No images uploaded yet. Upload one from the form.</p>
+        </div>
+        <div id="media-grid" class="media-grid" role="list" aria-label="Media files"></div>
+      </div>
+    </div>
+
+    <!-- Student View Section -->
+    <section id="student-view" class="student-view" role="tabpanel" aria-labelledby="student-btn" aria-hidden="false">
+      
+      <div id="student-notices-loading" class="text-center py-8 hidden">
+        <div class="spinner mx-auto"></div>
+        <p class="mt-2 text-gray-600">Loading notices...</p>
+      </div>
+      <div class="student-notices-container">
+        <button id="scroll-left" class="scroll-arrow left" aria-label="Scroll left">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <div id="student-notices" class="student-notices" role="list" aria-label="Student notices"></div>
+        <button id="scroll-right" class="scroll-arrow right" aria-label="Scroll right">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+      <div id="no-student-notices" class="text-center py-8 text-gray-500 hidden">
+        <i class="bi bi-inbox text-4xl mb-2"></i>
+        <p>No notices available at the moment.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- Toast notification container -->
+  <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Image Lightbox -->
+  <div id="image-lightbox" class="image-lightbox" aria-modal="true" role="dialog" aria-label="Image preview" aria-hidden="true">
+    <button id="lightbox-close" class="lightbox-close" aria-label="Close image preview">&times;</button>
+    <img id="lightbox-img" src="" alt="Full-size notice image"/>
+  </div>
+
+  <!-- App script -->
+  <script defer src="script.js"></script>
+</body>
+</html>
