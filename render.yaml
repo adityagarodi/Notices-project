@@ -5,7 +5,4 @@ services:
     plan: free
     buildCommand: "pip install -r backend/requirements.txt"
     startCommand: "python backend/app.py"
-    envVars:
-      - key: PYTHON_VERSION
-        value: 3.9.16
     healthCheckPath: /api/health
