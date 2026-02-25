@@ -1,0 +1,11 @@
+# Run these commands in Git Bash from your project directory:
+
+# Add your GitHub repository (replace YOUR_USERNAME with your actual GitHub username)
+git remote add origin https://github.com/YOUR_USERNAME/online-notice-board.git
+
+# Push to GitHub
+git branch -M main
+git push -u origin main
+
+# Note: If it asks for username/password, use your GitHub credentials
+# For better security, consider using GitHub Personal Access Token
