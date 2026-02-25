@@ -7,5 +7,5 @@ services:
     startCommand: "python backend/app.py"
     envVars:
       - key: PYTHON_VERSION
-        value: 3.9.0
+        value: 3.9.16
     healthCheckPath: /api/health
